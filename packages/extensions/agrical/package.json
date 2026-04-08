@@ -1,0 +1,39 @@
+{
+  "name": "@clockwork-ai/agrical",
+  "version": "0.1.0",
+  "description": "Agrical domain extension for Clockwork - agricultural mission types",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "tsc --noEmit",
+    "clean": "rm -rf dist coverage"
+  },
+  "keywords": [
+    "ics",
+    "calendar",
+    "agriculture",
+    "farming",
+    "agrical"
+  ],
+  "author": "FarmFriend Labs",
+  "license": "MIT",
+  "dependencies": {
+    "@clockwork-ai/core": "*"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.4.0"
+  }
+}
