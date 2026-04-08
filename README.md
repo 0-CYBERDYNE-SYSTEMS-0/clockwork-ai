@@ -4,7 +4,7 @@
 
 Clockwork is an open-source TypeScript library and CLI tool that gives AI agents first-class, safe tools to read, write, query, edit, and reason about calendar data using the ICS standard (RFC 5545) as the canonical format.
 
-GitHub: [github.com/farmfriend-labs/clockwork-ai](https://github.com/farmfriend-labs/clockwork-ai)
+GitHub: [github.com/0-CYBERDYNE-SYSTEMS-0/clockwork-ai](https://github.com/0-CYBERDYNE-SYSTEMS-0/clockwork-ai)
 
 ---
 
@@ -41,7 +41,7 @@ The ICS standard (RFC 5545) is the vendor-neutral, offline-capable, git-versiona
 
 ```bash
 # From source (monorepo)
-git clone https://github.com/farmfriend-labs/clockwork-ai.git
+git clone https://github.com/0-CYBERDYNE-SYSTEMS-0/clockwork-ai.git
 cd clockwork-ai
 npm install
 npm run build
@@ -164,6 +164,6 @@ MIT License - Copyright (c) 2026 FarmFriend Labs
 
 ## Links
 
-- GitHub: [github.com/farmfriend-labs/clockwork-ai](https://github.com/farmfriend-labs/clockwork-ai)
-- Documentation: [github.com/farmfriend-labs/clockwork-ai#readme](https://github.com/farmfriend-labs/clockwork-ai#readme)
-- Issues: [github.com/farmfriend-labs/clockwork-ai/issues](https://github.com/farmfriend-labs/clockwork-ai/issues)
+- GitHub: [github.com/0-CYBERDYNE-SYSTEMS-0/clockwork-ai](https://github.com/0-CYBERDYNE-SYSTEMS-0/clockwork-ai)
+- Documentation: [github.com/0-CYBERDYNE-SYSTEMS-0/clockwork-ai#readme](https://github.com/0-CYBERDYNE-SYSTEMS-0/clockwork-ai#readme)
+- Issues: [github.com/0-CYBERDYNE-SYSTEMS-0/clockwork-ai/issues](https://github.com/0-CYBERDYNE-SYSTEMS-0/clockwork-ai/issues)
