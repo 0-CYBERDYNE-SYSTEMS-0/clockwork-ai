@@ -1,5 +1,9 @@
 # Clockwork
 
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![GitHub stars](https://img.shields.io/github/stars/0-CYBERDYNE-SYSTEMS-0/clockwork-ai?style=flat)](https://github.com/0-CYBERDYNE-SYSTEMS-0/clockwork-ai/stargazers)
+
 **ICS-native reasoning layer for AI agents**
 
 Clockwork is an open-source TypeScript library and CLI tool that gives AI agents first-class, safe tools to read, write, query, edit, and reason about calendar data using the ICS standard (RFC 5545) as the canonical format.
