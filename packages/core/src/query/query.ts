@@ -154,15 +154,20 @@ export function findAvailableWindows(
       const gapEnd = new Date(Math.min(eventStart.getTime(), businessEnd.getTime()));
       const gapDuration = Math.round((gapEnd.getTime() - gapStart.getTime()) / 60000);
 
-      if (gapDuration >= durationMinutes) {
+      // Create multiple windows from the gap (not just one)
+      let winStart = new Date(gapStart);
+      while (windows.length < count) {
+        const winEnd = new Date(winStart.getTime() + durationMinutes * 60000);
+        if (winEnd.getTime() > gapEnd.getTime()) break;
         windows.push({
-          start: gapStart,
-          end: new Date(gapStart.getTime() + durationMinutes * 60000),
+          start: new Date(winStart),
+          end: winEnd,
           durationMinutes,
-          score: gapDuration - durationMinutes, // Prefer smaller gaps (less waste)
+          score: Math.round((winStart.getTime() - gapStart.getTime()) / 60000), // earlier = better
         });
-        if (windows.length >= count) break;
+        winStart = new Date(winStart.getTime() + durationMinutes * 60000);
       }
+      if (windows.length >= count) break;
     }
 
     cursor = new Date(Math.max(cursor.getTime(), eventEnd.getTime()));
@@ -171,14 +176,18 @@ export function findAvailableWindows(
 
   // Check remaining time after last event
   if (windows.length < count && cursor < businessEnd) {
-    const gapDuration = Math.round((businessEnd.getTime() - cursor.getTime()) / 60000);
-    if (gapDuration >= durationMinutes) {
+    const gapStart = new Date(cursor);
+    let winStart = new Date(gapStart);
+    while (windows.length < count) {
+      const winEnd = new Date(winStart.getTime() + durationMinutes * 60000);
+      if (winEnd.getTime() > businessEnd.getTime()) break;
       windows.push({
-        start: new Date(cursor),
-        end: new Date(cursor.getTime() + durationMinutes * 60000),
+        start: new Date(winStart),
+        end: winEnd,
         durationMinutes,
-        score: gapDuration - durationMinutes,
+        score: Math.round((winStart.getTime() - gapStart.getTime()) / 60000),
       });
+      winStart = new Date(winStart.getTime() + durationMinutes * 60000);
     }
   }
 

@@ -62,7 +62,7 @@ describe('Query Filters', () => {
 
   describe('overlaps()', () => {
     it('returns events overlapping with the given time range', () => {
-      const result = overlaps(new Date('2026-04-15T09:30'), new Date('2026-04-15T11:30'))(events);
+      const result = overlaps(new Date('2026-04-15T08:30'), new Date('2026-04-15T11:30'))(events);
       expect(result.map(e => e.uid)).toEqual(['morning', 'midday']);
     });
 

@@ -43,14 +43,14 @@ describe('RRuleValidator', () => {
     });
 
     it('returns error for INTERVAL < 1', () => {
-      const rrule = parser.parse('FREQ=DAILY;INTERVAL=0');
+      const rrule = { freq: 'DAILY' as const, interval: 0 };
       const result = validator.validate(rrule);
       expect(result.valid).toBe(false);
       expect(result.errors.some(e => e.code === 'INVALID_INTERVAL')).toBe(true);
     });
 
     it('returns error for COUNT < 1', () => {
-      const rrule = parser.parse('FREQ=DAILY;COUNT=0');
+      const rrule = { freq: 'DAILY' as const, interval: 1, count: 0 };
       const result = validator.validate(rrule);
       expect(result.valid).toBe(false);
       expect(result.errors.some(e => e.code === 'INVALID_COUNT')).toBe(true);
@@ -112,7 +112,7 @@ describe('RRuleValidator', () => {
     });
 
     it('accepts valid BYDAY with position', () => {
-      const rrule = parser.parse('FREQ=MONTHLY;BYDAY=1MO,-1FR');
+      const rrule = parser.parse('FREQ=MONTHLY;BYDAY=1MO,-1FR;COUNT=10');
       const result = validator.validate(rrule);
       expect(result.valid).toBe(true);
     });

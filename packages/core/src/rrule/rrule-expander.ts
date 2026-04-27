@@ -31,8 +31,8 @@ export class RRuleExpander {
     exdates: Date[] = [],
     rdates: Date[] = [],
   ): Date[] {
-    // Apply max count safety
-    const maxOccurrences = 1000;
+    // Apply max count safety — use rrule.count if set, otherwise cap at 1000
+    const maxOccurrences = rrule.count ?? 1000;
     const effectiveEnd = this.effectiveEnd(rrule, rangeEnd);
 
     let occurrences: Date[] = [];
@@ -78,11 +78,11 @@ export class RRuleExpander {
   }
 
   private effectiveEnd(rrule: RRule, rangeEnd: Date): Date {
-    if (rrule.until && rrule.until < rangeEnd) {
-      return rrule.until;
-    }
-    if (rrule.count) {
-      // Can't know effective end without expanding — use rangeEnd with count cap
+    if (rrule.until) {
+      // UNTIL is date-inclusive per RFC 5545 — shift to end of UTC day
+      const endOfDay = new Date(rrule.until);
+      endOfDay.setUTCHours(23, 59, 59, 999);
+      if (endOfDay < rangeEnd) return endOfDay;
     }
     return rangeEnd;
   }
@@ -227,8 +227,12 @@ export class RRuleExpander {
     const candidates: Date[] = [];
 
     if (!byDay || byDay.length === 0) {
-      // Default: same day of week as dtstart
-      candidates.push(new Date(originalStart));
+      // Default: same day of week as dtstart, in the current week
+      const targetDayOfWeek = originalStart.getDay();
+      const currentDayOfWeek = weekStart.getDay();
+      let diff = targetDayOfWeek - currentDayOfWeek;
+      if (diff < 0) diff += 7;
+      candidates.push(this.addDays(weekStart, diff));
       return candidates;
     }
 
@@ -263,8 +267,13 @@ export class RRuleExpander {
     const month = current.getMonth();
 
     if (byMonthDay && byMonthDay.length > 0) {
+      const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
       for (const day of byMonthDay) {
-        const d = new Date(year, month, day);
+        let effectiveDay = day;
+        if (day < 0) {
+          effectiveDay = lastDayOfMonth + 1 + day;
+        }
+        const d = new Date(year, month, effectiveDay);
         if (d.getMonth() === month) { // Valid day for this month
           candidates.push(d);
         }
@@ -285,8 +294,11 @@ export class RRuleExpander {
         }
       }
     } else {
-      // Default: same day of month as dtstart
-      candidates.push(new Date(originalStart));
+      // Default: same day of month as dtstart, in the current month
+      const day = originalStart.getDate();
+      const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+      const d = Math.min(day, lastDayOfMonth);
+      candidates.push(new Date(year, month, d));
     }
 
     return candidates;

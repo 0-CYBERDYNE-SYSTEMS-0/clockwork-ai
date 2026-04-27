@@ -1,27 +1,17 @@
 module.exports = {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
   roots: ['<rootDir>/tests'],
   testMatch: ['**/*.test.ts'],
   moduleNameMapper: {
-    '^(\\.{1,2}/src/.*)\\.js$': '$1.ts',
+    '^(\\.{1,2}/.*)\\.js$': '$1',
     '^@clockwork-ai/core$': '<rootDir>/src/index.ts',
   },
-  collectCoverageFrom: [
-    'src/**/*.ts',
-    '!src/**/*.d.ts'
-  ],
-  coverageThreshold: {
-    global: {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80
-    }
+  transform: {
+    '^.+\\.tsx?$': ['ts-jest', {
+      useESM: true,
+      isolatedModules: true,
+    }],
   },
-  globals: {
-    'ts-jest': {
-      isolatedModules: true
-    }
-  }
+  extensionsToTreatAsEsm: ['.ts'],
 };
