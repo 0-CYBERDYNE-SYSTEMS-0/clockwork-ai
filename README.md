@@ -116,7 +116,7 @@ const output = serializer.serializeCalendar(calendar);
 
 ## Architecture
 
-![Clockwork AI Architecture Diagram](docs/architecture.png)
+![Clockwork AI Architecture Diagram](docs/architecture.svg)
 
 > **[Open interactive diagram →](https://excalidraw.com/#json=Rbs8W0_-xbfHNIvCenZEv,AxuFbyMPeKViZ4DrTyfskQ)** — zoom, pan, and inspect the full architecture on Excalidraw.
 
