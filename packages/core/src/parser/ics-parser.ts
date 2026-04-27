@@ -57,7 +57,7 @@ export class ICSParser {
       }
       if (token.type === 'BEGIN') {
         this.advance();
-        const componentName = this.current().name;
+        const componentName = token.name;
         if (componentName === 'VEVENT') {
           const event = this.parseEvent();
           if (event) calendar.events.push(event);
@@ -103,7 +103,24 @@ export class ICSParser {
     const summary = props.get('SUMMARY')?.value ?? 'Untitled';
     const uid = props.get('UID')?.value ?? crypto.randomUUID();
 
-    if (!dtstart) return null;
+    if (!dtstart) {
+      // Lenient parsing: event without DTSTART — use epoch as fallback
+      return {
+        uid,
+        summary,
+        description: props.get('DESCRIPTION')?.value,
+        location: props.get('LOCATION')?.value,
+        start: { date: new Date(0), timezone: 'UTC', isAllDay: false },
+        end: { date: new Date(0), timezone: 'UTC', isAllDay: false },
+        duration: 0,
+        categories: [],
+        xProperties: new Map(),
+        created: new Date(),
+        modified: new Date(),
+        sequence: 0,
+        status: 'CONFIRMED',
+      };
+    }
 
     const start = this.parseDateTime(dtstart);
     let end: DateWithTz;

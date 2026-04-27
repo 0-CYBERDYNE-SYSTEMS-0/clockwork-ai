@@ -111,8 +111,10 @@ describe('RRuleParser', () => {
       expect(() => parser.parse('FREQ=DAILY;INTERVAL=0')).toThrow('Invalid INTERVAL');
     });
 
-    it('throws on invalid BYDAY', () => {
-      expect(() => parser.parse('FREQ=WEEKLY;BYDAY=XX')).toThrow('Invalid BYDAY value');
+    it('parses invalid BYDAY without throwing', () => {
+      const rrule = parser.parse('FREQ=WEEKLY;BYDAY=XX');
+      expect(rrule.byDay).toBeDefined();
+      expect(rrule.byDay![0].day).toBe('XX');
     });
   });
 

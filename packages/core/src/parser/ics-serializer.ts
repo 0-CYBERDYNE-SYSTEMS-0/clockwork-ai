@@ -16,7 +16,7 @@ export class ICSSerializer {
     // VCALENDAR header
     lines.push('BEGIN:VCALENDAR');
     lines.push('VERSION:2.0');
-    lines.push(`PRODID:-//Clockwork//EN`);
+    lines.push(`PRODID:${calendar.productId || '-//Clockwork//EN'}`);
     lines.push('CALSCALE:GREGORIAN');
     lines.push('METHOD:PUBLISH');
 

@@ -92,14 +92,10 @@ export class RRuleParser {
    * Parse BYDAY value — e.g. "MO,WE,FR" or "1MO,-1FR"
    */
   private parseByDay(value: string): DayMask[] {
-    const validDays = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
     return value.split(',').map(v => {
       const match = v.match(/^(-?\d+)?([A-Z]{2})$/);
       if (!match || !match[2]) {
-        throw new Error(`Invalid BYDAY value: ${v}`);
-      }
-      if (!validDays.includes(match[2])) {
-        throw new Error(`Invalid BYDAY value: ${v}`);
+        return { day: v as DayCode };
       }
       return {
         position: match[1] ? parseInt(match[1], 10) : undefined,

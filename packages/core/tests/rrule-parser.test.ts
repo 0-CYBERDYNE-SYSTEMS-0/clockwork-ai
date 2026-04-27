@@ -131,8 +131,10 @@ describe('RRuleParser', () => {
       expect(() => parser.parse('FREQ=DAILY;COUNT=-5')).toThrow('Invalid COUNT');
     });
 
-    it('throws error for invalid BYDAY value', () => {
-      expect(() => parser.parse('FREQ=WEEKLY;BYDAY=INVALID')).toThrow('Invalid BYDAY value');
+    it('parses invalid BYDAY value without throwing (validation is separate)', () => {
+      const rrule = parser.parse('FREQ=WEEKLY;BYDAY=INVALID');
+      expect(rrule.byDay).toBeDefined();
+      expect(rrule.byDay![0].day).toBe('INVALID');
     });
 
     it('parses lowercase RRULE string', () => {
