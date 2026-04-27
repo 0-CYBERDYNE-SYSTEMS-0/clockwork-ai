@@ -1,19 +1,19 @@
 # Clockwork
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D20.0.0-blue)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![RFC 5545](https://img.shields.io/badge/RFC-5545-orange)](https://datatracker.ietf.org/doc/html/rfc5545)
+[![Tests](https://img.shields.io/badge/tests-159%2F159-brightgreen)](https://github.com/0-CYBERDYNE-SYSTEMS-0/clockwork-ai)
 [![GitHub stars](https://img.shields.io/github/stars/0-CYBERDYNE-SYSTEMS-0/clockwork-ai?style=flat)](https://github.com/0-CYBERDYNE-SYSTEMS-0/clockwork-ai/stargazers)
 
 **ICS-native reasoning layer for AI agents**
 
-[![Tests](https://img.shields.io/badge/tests-159%20passed-brightgreen)](https://github.com/0-CYBERDYNE-SYSTEMS-0/clockwork-ai)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D20.0.0-blue)](https://nodejs.org)
-[![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
-[![RFC 5545](https://img.shields.io/badge/RFC-5545-orange)](https://datatracker.ietf.org/doc/html/rfc5545)
-
 Clockwork is an open-source TypeScript library and CLI that gives AI agents first-class tools to read, write, query, and reason about calendar data. It uses the ICS standard (RFC 5545) as its canonical format — no API keys, no rate limits, no vendor lock-in.
 
 **Why this exists:** AI agents need to schedule things. Existing calendar APIs (Google, Outlook, Apple) require OAuth, hit rate limits, and can't be version-controlled. ICS files are plain text, work offline, are git-versionable, and every calendar app can read them. Clockwork makes ICS agent-native.
+
+**Who is this for:** AI agent developers, calendar integration engineers, and anyone building autonomous scheduling systems. If your agent needs to read, write, or reason about calendar data without OAuth tokens or cloud dependencies, Clockwork is for you.
 
 ---
 
@@ -112,6 +112,42 @@ const serializer = new ICSSerializer();
 const output = serializer.serializeCalendar(calendar);
 ```
 
+### Show Me the Code (End-to-End)
+
+```typescript
+import { ICSParser, ConflictDetector, ICSSerializer } from '@clockwork-ai/core';
+
+// 1. Parse the farm's mission calendar
+const parser = new ICSParser();
+const calendar = parser.parse(fs.readFileSync('./farm-missions.ics', 'utf-8'));
+
+// 2. Propose a new planting event
+const proposedEvent = {
+  uid: 'plant-corn-001@farmfriend',
+  summary: 'Corn Planting — Pioneer P1197',
+  start: { date: new Date('2026-04-15T08:00:00'), timezone: 'America/Chicago', isAllDay: false },
+  end:   { date: new Date('2026-04-15T18:00:00'), timezone: 'America/Chicago', isAllDay: false },
+  // ...
+};
+
+// 3. Check for conflicts before committing
+const detector = new ConflictDetector();
+const conflicts = detector.detectAgainst(proposedEvent, calendar.events);
+
+if (conflicts.length > 0) {
+  console.error(`❌ ${conflicts.length} conflict(s) found:`);
+  conflicts.forEach(c => console.log(`  • ${c.severity}: ${c.description} (resolve: ${c.resolution})`));
+  process.exit(1);
+}
+
+// 4. Safe to commit — serialize back to ICS
+calendar.events.push(proposedEvent);
+const serializer = new ICSSerializer();
+const output = serializer.serializeCalendar(calendar);
+fs.writeFileSync('./farm-missions.ics', output);
+console.log('✅ Event added. No conflicts detected.');
+```
+
 ---
 
 ## Architecture
@@ -202,14 +238,51 @@ See [`SPEC-v0.2.0.md`](./SPEC-v0.2.0.md) for the detailed plan. Key next steps:
 
 ---
 
-## License
+## Alternatives
 
-MIT — Copyright (c) 2026 FarmFriend Labs
+| | Clockwork | rrule.js | Temporal.io | Google Calendar API |
+|---|---|---|---|---|
+| ICS parsing | ✅ Full RFC 5545 | ❌ | ❌ | ❌ |
+| RRULE expansion | ✅ | ✅ | ❌ | ❌ |
+| Conflict detection | ✅ | ❌ | ❌ | Partial |
+| Dry-run safety | ✅ | ❌ | ❌ | ❌ |
+| Agent-native tools | ✅ | ❌ | ✅ | ❌ |
+| Offline | ✅ | ✅ | ❌ | ❌ |
+| Git-versionable | ✅ | ❌ | ❌ | ❌ |
+| File-based (no auth) | ✅ | ✅ | ❌ | ❌ |
+
+Clockwork is the only library that combines ICS parsing, recurrence expansion, conflict detection, and dry-run safety into a single agent-native package.
 
 ---
 
-## Links
+## Community & Contributing
 
-- **Paper:** [Clockwork: Agent-Native Calendar Reasoning](./PAPER.md)
-- **GitHub:** [0-CYBERDYNE-SYSTEMS-0/clockwork-ai](https://github.com/0-CYBERDYNE-SYSTEMS-0/clockwork-ai)
-- **Issues:** [Report a bug](https://github.com/0-CYBERDYNE-SYSTEMS-0/clockwork-ai/issues)
+- **🐛 [Report a bug](https://github.com/0-CYBERDYNE-SYSTEMS-0/clockwork-ai/issues)**
+- **💡 [Request a feature](https://github.com/0-CYBERDYNE-SYSTEMS-0/clockwork-ai/issues)**
+- **📖 [Read the paper](./PAPER.md)**
+- **📋 [See the roadmap](./SPEC-v0.2.0.md)**
+- **🔧 [Contributing guide](./CONTRIBUTING.md)**
+
+Contributions welcome. Check the roadmap for `help wanted` items or open an issue to discuss new domain extensions.
+
+---
+
+## Citation
+
+If you use Clockwork in your research or agent system, please cite:
+
+```bibtex
+@misc{clockwork2026,
+  title        = {Clockwork: Agent-Native Calendar Reasoning},
+  author       = {{FarmFriend Labs}},
+  year         = 2026,
+  howpublished = {\\url{https://github.com/0-CYBERDYNE-SYSTEMS-0/clockwork-ai}},
+  note         = {v0.1.0 — 159/159 tests passing, MIT licensed}
+}
+```
+
+---
+
+## License
+
+MIT — Copyright (c) 2026 FarmFriend Labs
