@@ -1,37 +1,37 @@
 {
-  "name": "@clockwork-ai/cli",
+  "name": "@clockwork-ai/mcp",
   "version": "0.1.0",
-  "description": "Clockwork CLI - AI-native calendar reasoning tools",
+  "description": "MCP server for Clockwork — expose calendar reasoning tools to AI agents",
   "main": "dist/index.js",
   "bin": {
-    "clockwork": "./dist/index.js"
+    "clockwork-mcp": "./dist/index.js"
   },
   "exports": {
     ".": {
       "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js",
       "types": "./dist/index.d.ts"
     }
   },
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "tsc --noEmit",
     "clean": "rm -rf dist coverage"
   },
   "keywords": [
-    "ics",
+    "mcp",
     "calendar",
-    "cli",
-    "ai"
+    "ics",
+    "clockwork",
+    "ai-agent"
   ],
   "author": "FarmFriend Labs",
   "license": "MIT",
   "dependencies": {
-    "@clockwork-ai/agrical": "*",
     "@clockwork-ai/core": "*",
-    "chalk": "^4.1.0",
-    "commander": "^12.0.0",
-    "ora": "^5.4.0"
+    "@modelcontextprotocol/sdk": "^1.0.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",

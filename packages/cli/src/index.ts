@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { Command } from 'commander';
 import { createEvent } from './commands/create-event.js';
 import { findConflicts } from './commands/find-conflicts.js';

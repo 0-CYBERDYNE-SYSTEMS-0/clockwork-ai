@@ -3,31 +3,46 @@
  * Sequence-numbered transaction log with TTL-based dry-run and rollback support
  */
 
-import type { Event, Operation, TransactionLog, DryRunResult, Conflict, AgentScope } from '../types.js';
+import type { Event, Operation, TransactionLog, DryRunResult, Conflict, ScopeViolation, AgentScope } from '../types.js';
 import { ConflictDetector } from '../conflicts/conflicts.js';
+import { ScopeLimiter } from '../scope/scope.js';
 
 export class TransactionManager {
   private transactions = new Map<string, TransactionLog>();
   private seqCounter = 0;
   private defaultTTLMs: number;
+  private scopeLimiter: ScopeLimiter;
 
   constructor(defaultTTLMs: number = 5 * 60 * 1000) {
     this.defaultTTLMs = defaultTTLMs;
+    this.scopeLimiter = new ScopeLimiter();
   }
 
   /**
-   * Create a new dry-run transaction
+   * Create a new dry-run transaction, optionally enforcing agent scope
    */
   createDryRun(
     agentId: string,
     operations: Operation[],
     existingEvents: Event[],
     ttlMs?: number,
+    scope?: AgentScope,
   ): DryRunResult {
     const id = this.generateId();
     const seq = ++this.seqCounter;
     const now = new Date();
     const ttl = ttlMs ?? this.defaultTTLMs;
+
+    // Enforce scope if provided
+    const violations: ScopeViolation[] = [];
+    if (scope) {
+      for (const op of operations) {
+        const result = this.scopeLimiter.enforce(op, scope);
+        if (!result.allowed) {
+          violations.push({ operation: op, reason: result.reason ?? 'Scope violation' });
+        }
+      }
+    }
 
     const transaction: TransactionLog = {
       id,
@@ -41,14 +56,18 @@ export class TransactionManager {
 
     this.transactions.set(id, transaction);
 
-    // Detect conflicts
+    // Detect conflicts (only for allowed operations)
     const conflictDetector = new ConflictDetector();
     const allEvents = [...existingEvents];
-    const newEvents = operations.filter(op => op.type === 'create').map(op => (op as { type: 'create'; event: Event }).event);
 
     const conflicts: Conflict[] = [];
 
-    for (const op of operations) {
+    // Only check conflicts for non-violating operations
+    const allowedOps = violations.length > 0
+      ? operations.filter(op => !violations.some(v => v.operation === op))
+      : operations;
+
+    for (const op of allowedOps) {
       if (op.type === 'create') {
         conflicts.push(...conflictDetector.detectConflictsForNew(
           { start: op.event.start.date, end: op.event.end.date, duration: op.event.duration },
@@ -66,11 +85,15 @@ export class TransactionManager {
       }
     }
 
+    const hasCriticalConflicts = conflicts.some(c => c.severity === 'critical');
+    const canCommit = violations.length === 0 && !hasCriticalConflicts;
+
     return {
       transactionId: id,
       preview: operations,
       conflicts,
-      canCommit: conflicts.filter(c => c.severity === 'critical').length === 0,
+      violations,
+      canCommit,
     };
   }
 

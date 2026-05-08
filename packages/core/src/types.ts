@@ -114,10 +114,16 @@ export interface TransactionLog {
   agentId: string;
 }
 
+export interface ScopeViolation {
+  operation: Operation;
+  reason: string;
+}
+
 export interface DryRunResult {
   transactionId: string;
   preview: Operation[];
   conflicts: Conflict[];
+  violations: ScopeViolation[];
   canCommit: boolean;
 }
 

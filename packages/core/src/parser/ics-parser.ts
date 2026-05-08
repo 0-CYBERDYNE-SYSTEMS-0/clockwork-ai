@@ -5,7 +5,8 @@
 
 import { ICSTokenizer } from './ics-tokenizer.js';
 import type { Token } from './ics-tokenizer.js';
-import type { Event, DateWithTz, RRule, VTimezone, CalendarFile, DayMask, DayCode } from '../types.js';
+import type { Event, DateWithTz, RRule, VTimezone, TZComponent, CalendarFile } from '../types.js';
+import { RRuleParser } from '../rrule/rrule-parser.js';
 
 interface ParsedProperty {
   name: string;
@@ -143,7 +144,8 @@ export class ICSParser {
     let rrule: RRule | undefined;
     const rruleProp = props.get('RRULE');
     if (rruleProp) {
-      rrule = this.parseRRule(rruleProp.value);
+      const parser = new RRuleParser();
+      rrule = parser.parse(rruleProp.value);
     }
 
     // Parse EXDATE
@@ -243,65 +245,6 @@ export class ICSParser {
     return { date, timezone, isAllDay };
   }
 
-  private parseRRule(rruleStr: string): RRule {
-    const parts = rruleStr.split(';');
-    const rrule: RRule = { freq: 'WEEKLY', interval: 1 };
-
-    for (const part of parts) {
-      const eqIdx = part.indexOf('=');
-      if (eqIdx === -1) continue;
-      const key = part.slice(0, eqIdx).toUpperCase();
-      const value = part.slice(eqIdx + 1);
-      switch (key) {
-        case 'FREQ':
-          rrule.freq = value.toUpperCase() as RRule['freq'];
-          break;
-        case 'INTERVAL':
-          rrule.interval = parseInt(value, 10) || 1;
-          break;
-        case 'UNTIL':
-          rrule.until = this.parseRRuleDate(value);
-          break;
-        case 'COUNT':
-          rrule.count = parseInt(value, 10);
-          break;
-        case 'BYDAY':
-          rrule.byDay = this.parseByDay(value);
-          break;
-        case 'BYMONTHDAY':
-          rrule.byMonthDay = value.split(',').map(v => parseInt(v, 10));
-          break;
-        case 'BYMONTH':
-          rrule.byMonth = value.split(',').map(v => parseInt(v, 10));
-          break;
-      }
-    }
-
-    return rrule;
-  }
-
-  private parseRRuleDate(value: string): Date {
-    // UTC UNTIL value: YYYYMMDDTHHMMSSZ
-    const year = parseInt(value.slice(0, 4), 10);
-    const month = parseInt(value.slice(4, 6), 10) - 1;
-    const day = parseInt(value.slice(6, 8), 10);
-    const hour = parseInt(value.slice(9, 11), 10) || 0;
-    const minute = parseInt(value.slice(11, 13), 10) || 0;
-    const second = parseInt(value.slice(13, 15), 10) || 0;
-    return new Date(Date.UTC(year, month, day, hour, minute, second));
-  }
-
-  private parseByDay(value: string): DayMask[] {
-    return value.split(',').map(v => {
-      const match = v.match(/^(-?\d+)?([A-Z]{2})$/);
-      if (!match) return { day: v as DayCode };
-      return {
-        position: match[1] ? parseInt(match[1], 10) : undefined,
-        day: match[2] as DayCode,
-      };
-    });
-  }
-
   private parseStatus(value?: string): Event['status'] {
     switch (value?.toUpperCase()) {
       case 'CONFIRMED': return 'CONFIRMED';
@@ -313,8 +256,8 @@ export class ICSParser {
 
   private parseTimezone(): VTimezone | null {
     let tzid = '';
-    const standard: VTimezone['standard'] = undefined;
-    const daylight: VTimezone['daylight'] = undefined;
+    let standard: TZComponent | undefined;
+    let daylight: TZComponent | undefined;
 
     while (this.pos < this.tokens.length) {
       const token = this.current();
@@ -322,6 +265,16 @@ export class ICSParser {
       if (token.type === 'END' && token.name === 'VTIMEZONE') {
         this.advance();
         break;
+      }
+      if (token.type === 'BEGIN') {
+        const subName = token.name;
+        this.advance();
+        if (subName === 'STANDARD') {
+          standard = this.parseTZComponent();
+        } else if (subName === 'DAYLIGHT') {
+          daylight = this.parseTZComponent();
+        }
+        continue;
       }
       if (token.type === 'CONTENTLINE') {
         if (token.name === 'TZID') {
@@ -333,6 +286,52 @@ export class ICSParser {
 
     if (!tzid) return null;
     return { tzid, standard, daylight };
+  }
+
+  /**
+   * Parse a STANDARD or DAYLIGHT sub-component inside VTIMEZONE
+   */
+  private parseTZComponent(): TZComponent {
+    let tzoffsetFrom = '+0000';
+    let tzoffsetTo = '+0000';
+    let tzname = '';
+    let dtstart = '';
+    let rrule: string | undefined;
+    let comment: string | undefined;
+
+    while (this.pos < this.tokens.length) {
+      const token = this.current();
+      if (token.type === 'EOF') break;
+      if (token.type === 'END' && (token.name === 'STANDARD' || token.name === 'DAYLIGHT')) {
+        this.advance();
+        break;
+      }
+      if (token.type === 'CONTENTLINE') {
+        switch (token.name) {
+          case 'TZOFFSETFROM':
+            tzoffsetFrom = token.value ?? '+0000';
+            break;
+          case 'TZOFFSETTO':
+            tzoffsetTo = token.value ?? '+0000';
+            break;
+          case 'TZNAME':
+            tzname = token.value ?? '';
+            break;
+          case 'DTSTART':
+            dtstart = token.value ?? '';
+            break;
+          case 'RRULE':
+            rrule = token.value;
+            break;
+          case 'COMMENT':
+            comment = token.value;
+            break;
+        }
+      }
+      this.advance();
+    }
+
+    return { tzoffsetFrom, tzoffsetTo, tzname, dtstart, rrule, comment };
   }
 
   private current(): Token {

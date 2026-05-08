@@ -5,7 +5,7 @@
 import { spawn } from 'child_process';
 import path from 'path';
 
-const CLI_PATH = path.join(__dirname, '../../dist/index.js');
+const CLI_PATH = path.join(__dirname, '../dist/index.js');
 
 function runCLI(args: string[]): Promise<{ stdout: string; stderr: string; exitCode: number }> {
   return new Promise((resolve) => {

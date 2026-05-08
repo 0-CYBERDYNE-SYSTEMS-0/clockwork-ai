@@ -64,6 +64,7 @@ export type {
   Operation,
   TransactionLog,
   DryRunResult,
+  ScopeViolation,
   AgentScope,
   MissionType,
   Extension,
