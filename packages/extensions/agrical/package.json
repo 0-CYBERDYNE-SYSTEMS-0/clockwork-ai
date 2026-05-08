@@ -1,6 +1,6 @@
 {
   "name": "@clockwork-ai/agrical",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Agrical domain extension for Clockwork - agricultural mission types",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

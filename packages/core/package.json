@@ -1,6 +1,6 @@
 {
   "name": "@clockwork-ai/core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "ICS engine - RFC 5545 compliant parser, RRULE, validator, timezone, conflicts, transactions",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

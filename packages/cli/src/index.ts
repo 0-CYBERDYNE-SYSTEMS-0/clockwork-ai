@@ -10,7 +10,7 @@ import { createMission } from './commands/create-mission.js';
 
 export function runCLI() {
   const program = new Command();
-  program.name('clockwork').description('ICS-native reasoning layer for AI agents').version('0.1.0');
+  program.name('clockwork').description('ICS-native reasoning layer for AI agents').version('0.2.0');
   program.addCommand(createEvent);
   program.addCommand(findConflicts);
   program.addCommand(resolveRecurrence);

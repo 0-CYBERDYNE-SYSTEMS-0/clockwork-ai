@@ -19,20 +19,21 @@ Clockwork is an open-source TypeScript library and CLI that gives AI agents firs
 
 ## What's Built & Verified
 
-| Module | Status | Description |
-|--------|--------|-------------|
-| **ICS Parser + Serializer** | ✅ | RFC 5545 tokenizer, parser, serializer — full round-trip fidelity |
-| **RRULE Engine** | ✅ | Parse, expand, validate recurrence rules (FREQ, INTERVAL, UNTIL, COUNT, BYDAY, BYMONTHDAY, BYMONTH, EXDATE, RDATE) |
-| **Conflict Detection** | ✅ | Overlap detection with severity classification and resolution options |
-| **Query Engine** | ✅ | Composable filters: after, before, overlaps, hasTag, inDateRange, duration bounds |
-| **Validator** | ✅ | RFC 5545 compliance checks: missing FREQ, invalid intervals, day codes, infinite recurrence |
-| **Timezone Handler** | ✅ | VTIMEZONE parsing, UTC/floating detection, DST transition awareness |
-| **Scope Limiter** | ✅ | Per-agent read/write path boundaries for safe multi-agent operations |
-| **Agrical Extension** | 🚧 | 5 mission types (planting, scouting, chemical, equipment, compliance) — code complete, tests pending |
-| **CLI** | ✅ | 7 commands via Commander: validate-rrule, resolve-recurrence, find-conflicts, plan-windows, create-event, query-events, create-mission |
-| **Transaction System** | 🚧 | Dry-run scaffolding exists; scope enforcement integration in-progress |
+|| Module | Status | Description |
+||--------|--------|-------------|
+|| **ICS Parser + Serializer** | ✅ | RFC 5545 tokenizer, parser, serializer — full round-trip fidelity, single RRULE parser |
+|| **RRULE Engine** | ✅ | Parse, expand, validate recurrence rules (FREQ, INTERVAL, UNTIL, COUNT, BYDAY, BYMONTHDAY, BYMONTH, EXDATE, RDATE) |
+|| **Conflict Detection** | ✅ | Overlap detection with severity classification and resolution options |
+|| **Query Engine** | ✅ | Composable filters: after, before, overlaps, hasTag, inDateRange, duration bounds |
+|| **Validator** | ✅ | RFC 5545 compliance checks: missing FREQ, invalid intervals, day codes, infinite recurrence |
+|| **Timezone Handler** | ✅ | Full VTIMEZONE parsing (STANDARD/DAYLIGHT), DST transition awareness |
+|| **Scope Limiter** | ✅ | Per-agent read/write path boundaries, wired into transaction manager |
+|| **Agrical Extension** | ✅ | 5 mission types (planting, scouting, chemical, equipment, compliance) — 26/26 tests passing |
+|| **CLI** | ✅ | 7 commands via Commander, shebang, full binary entry point |
+|| **Transaction System** | ✅ | Dry-run, scope enforcement, TTL-based pending ops, rollback |
+|| **MCP Server** | ✅ | 7 tools exposed: validate_rrule, resolve_recurrence, find_conflicts, plan_windows, create_event, query_events, create_mission |
 
-**Total: 159 tests, 7 suites, 0 failures — verified 2026-04-27.**
+**Total: 196 tests, 9 suites, 0 failures — verified 2026-05-08 (v0.2.0).**
 
 ---
 
@@ -71,6 +72,23 @@ clockwork query-events --calendar ./missions.ics --filter "planting windows this
 # Create an agricultural mission
 clockwork create-mission planting --crop corn --variety "Pioneer P1197" --field north-40 --window 2026-04-15/2026-04-22 --calendar ./farm-missions.ics
 ```
+
+### MCP Server (AI Agent Integration)
+
+Clockwork ships an MCP server that exposes all 7 tools to any MCP-capable agent (Claude Desktop, Hermes, Cursor, Continue, etc.):
+
+```json
+{
+  "mcpServers": {
+    "clockwork": {
+      "command": "node",
+      "args": ["/path/to/clockwork-ai/packages/mcp/dist/index.js"]
+    }
+  }
+}
+```
+
+Available MCP tools: `validate_rrule`, `resolve_recurrence`, `find_conflicts`, `plan_windows`, `create_event`, `query_events`, `create_mission`.
 
 ### Library
 
@@ -201,27 +219,33 @@ clockwork-ai/
 │   │   └── tests/         # 7 test suites, 159 tests, 0 failures
 │   ├── cli/               # Commander-based CLI — 7 commands
 │   │   ├── src/           # 10 source files
-│   │   └── tests/
+│   │   └── tests/         # 1 test suite, 11 tests, 0 failures
+│   ├── mcp/               # MCP server — 7 tools exposed via Model Context Protocol
+│   │   └── src/
 │   └── extensions/
 │       └── agrical/       # Agricultural domain extension — 5 mission types
 │           ├── src/
-│           └── tests/
+│           └── tests/     # 1 test suite, 26 tests, 0 failures
 ├── package.json           # npm workspaces + Turborepo
-└── SPEC-v0.2.0.md         # Next-phase roadmap
+└── SPEC-v0.2.0.md         # Completed — all items shipped
 ```
 
 ---
 
 ## Roadmap
 
-See [`SPEC-v0.2.0.md`](./SPEC-v0.2.0.md) for the detailed plan. Key next steps:
+See [`SPEC-v0.2.0.md`](./SPEC-v0.2.0.md) for the detailed plan. v0.2.0 is **COMPLETE**. Key items shipped:
 
-1. ~~Fix all failing tests~~ ✅ Done — 159/159 passing
-2. **Deduplicate RRULE parser** (ICSParser has duplicate logic)
-3. **Complete VTIMEZONE parsing** (STANDARD/DAYLIGHT sub-components)
-4. **Wire scope enforcement** into transaction manager
-5. **CI/CD** — GitHub Actions
-6. **MCP Server** — Expose all Clockwork tools as MCP endpoints for Claude, Hermes, Cursor, etc.
+1. ✅ 159/159 core tests passing — zero failures
+2. ✅ RRULE parser deduplicated (single implementation)
+3. ✅ Full VTIMEZONE STANDARD/DAYLIGHT parsing
+4. ✅ Scope enforcement wired into transaction manager
+5. ✅ CLI binary with shebang, all 7 commands
+6. ✅ CI/CD via GitHub Actions
+7. ✅ MCP Server — 7 tools exposed via Model Context Protocol
+8. ✅ Agrical extension — 26/26 tests passing
+
+Next frontier: CalDAV bridge, cryptographic signing, natural language query decomposition.
 
 ---
 

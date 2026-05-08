@@ -195,33 +195,33 @@ This domain-specific validation runs inside the agent's scheduling loop, catchin
 
 ## 5. Current Status
 
-Clockwork v0.1.0 is **buildable, testable, and passing.** As of April 2026:
+Clockwork v0.2.0 is **buildable, testable, and all-green.** As of May 2026:
 
 | Metric | Value |
 |--------|-------|
-| Source lines (TypeScript) | 5,792 |
-| Test lines | 2,119 |
-| Test suites | 7 |
-| Tests passing | **159 / 159** |
+| Source lines (TypeScript) | 6,454 |
+| Test lines | 2,446 |
+| Test suites | 9 |
+| Tests passing | **196 / 196** |
 | Test failures | **0** |
 | Core modules | 13 |
 | CLI commands | 7 |
 | Extension mission types | 5 |
+| MCP tools | 7 |
 
 **What's verified working:**
 - Full ICS tokenize → parse → serialize round-trip (RFC 5545)
-- RRULE parsing, expansion, and validation across all frequency types
+- Single RRULE parsing implementation (deduplicated)
+- RRULE expansion and validation across all frequency types
 - Temporal conflict detection with severity classification
 - Composable query filters (after, before, overlaps, hasTag, duration bounds, etc.)
-- Basic VTIMEZONE parsing with UTC/floating detection
-- Commander-based CLI with all documented commands
+- Full VTIMEZONE parsing with STANDARD/DAYLIGHT sub-components
+- Scope-limited transaction management
+- Commander-based CLI with all 7 documented commands
+- Agrical extension with 5 validated mission types (26/26 tests)
+- MCP server with 7 tools — tested tools/list + tools/call
 
-**What's in progress (see SPEC-v0.2.0.md):**
-- Deduplicating the RRULE parser (currently two implementations)
-- Completing VTIMEZONE STANDARD/DAYLIGHT sub-component parsing
-- Wiring scope enforcement into the transaction manager
-- CI/CD via GitHub Actions
-- MCP server to expose Clockwork as a universal agent tool
+**v0.2.0 completed — all targeted items shipped.** Next frontier: CalDAV bridge, cryptographic signing, MCP-server authenticated mode.
 
 ---
 
